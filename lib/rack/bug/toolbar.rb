@@ -16,10 +16,17 @@ module Rack
         Rack::Bug.enable
         status, headers, body = builder.call(@env)
         Rack::Bug.disable
+        
+        data = @env['rack-bug.panels'].select{|p| p.respond_to?(:to_hash)}.inject({}){|h, p| h[p.name]=p.to_hash; h}.to_json
+
+        i = 0
+        begin
+          headers["X-RailsBug-#{i+=1}"] = data.slice!(0, 8000)
+        end while data.length > 0
 
         @response = Rack::Response.new(body, status, headers)
         
-        inject_toolbar if response_type_okay_to_modify?
+        #inject_toolbar if response_type_okay_to_modify?
         
         return @response.to_a
       end

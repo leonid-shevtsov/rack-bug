@@ -56,6 +56,10 @@ module Rack
         def self.execute(sql)
           ActiveRecord::Base.connection.execute(sql)
         end
+
+        def to_hash
+          {:sql => @sql, :time => human_time, :backtrace => filtered_backtrace}
+        end
       end
 
     end

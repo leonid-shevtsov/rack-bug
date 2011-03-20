@@ -15,7 +15,11 @@ module Rack
         end
 
         def cleaned_message
-          @message.to_s.gsub(/\e\[[;\d]+m/, "")
+          @message.to_s.gsub(/\e\[[;\d]+m/, "").strip
+        end
+
+        def to_hash
+          {:level => @level, :time => @time, :message => CGI.escapeHTML(cleaned_message)}
         end
       end
 
@@ -46,6 +50,12 @@ module Rack
 
       def content
         result = render_template "panels/log", :logs => self.class.logs
+        self.class.reset
+        return result
+      end
+
+      def to_hash
+        result = {:title => 'Rails log', :entries => self.class.logs.map(&:to_hash)}
         self.class.reset
         return result
       end
