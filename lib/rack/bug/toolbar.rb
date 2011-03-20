@@ -5,10 +5,11 @@ module Rack
 
       MIME_TYPES = ["text/html", "application/xhtml+xml"]
 
-      def initialize(app, railsbug_enabled)
+      def initialize(app)
         @app = app
-        @railsbug_enabled = railsbug_enabled
       end
+
+      attr_accessor :railsbug_enabled
       
       def call(env)
         @env = env
@@ -21,17 +22,13 @@ module Rack
 
         @response = Rack::Response.new(body, status, headers)
 
-        if railsbug_enabled?
+        if railsbug_enabled
           inject_railsbug_headers
         elsif response_type_okay_to_modify?
           inject_toolbar 
         end
         
         return @response.to_a
-      end
-
-      def railsbug_enabled?
-        @railsbug_enabled
       end
 
       def inject_railsbug_headers

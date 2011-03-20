@@ -39,7 +39,8 @@ class Rack::Bug
     @original_request = Rack::Request.new(@env)
 
     if ((toolbar_requested? && toolbar_xhr?) || railsbug_enabled?) && ip_authorized? && password_authorized?
-      @toolbar.call(env, railsbug_enabled?)
+      @toolbar.railsbug_enabled = railsbug_enabled?
+      @toolbar.call(env)
     else
       @app.call(env)
     end
@@ -64,7 +65,7 @@ private
   end
 
   def railsbug_enabled?
-    @original_request.header['X-RailsBug-Enabled']
+    !!options['HTTP_X_RAILSBUG_ENABLED']
   end
 
   def ip_authorized?
