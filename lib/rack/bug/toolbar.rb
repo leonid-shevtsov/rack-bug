@@ -43,9 +43,8 @@ module Rack
       def collect_railsbug_data
         @env['rack-bug.panels'].select {|panel| 
           panel.respond_to?(:to_hash)
-        }.reverse.inject({}){ |response_hash, panel| 
-          response_hash[panel.name]=panel.to_hash
-          response_hash
+        }.map { |panel| 
+          [panel.name, panel.to_hash]
         }.to_json
       end
 
