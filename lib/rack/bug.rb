@@ -38,11 +38,11 @@ class Rack::Bug
     @env = env
     @original_request = Rack::Request.new(@env)
 
-#    if toolbar_requested? && ip_authorized? && password_authorized? && toolbar_xhr?
-      @toolbar.call(env)
-#    else
-#      @app.call(env)
-#    end
+    if ((toolbar_requested? && toolbar_xhr?) || railsbug_enabled?) && ip_authorized? && password_authorized?
+      @toolbar.call(env, railsbug_enabled?)
+    else
+      @app.call(env)
+    end
   end
   
 private 
@@ -61,6 +61,10 @@ private
   
   def toolbar_requested?
     @original_request.cookies["rack_bug_enabled"]
+  end
+
+  def railsbug_enabled?
+    @original_request.header['X-RailsBug-Enabled']
   end
 
   def ip_authorized?

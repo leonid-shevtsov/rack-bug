@@ -60,6 +60,18 @@ module Rack
         def joined_children_html
           children.map { |c| c.html }.join
         end
+
+        def to_hash
+          result = {:name => name}
+          if @end_time
+            result[:time] = time
+            result[:exclusive_time] = exclusive_time
+          end
+          if children.any?
+            result[:children] = children.map(&:to_hash)
+          end
+          result
+        end
       end
 
     end

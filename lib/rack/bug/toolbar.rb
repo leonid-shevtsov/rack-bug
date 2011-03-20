@@ -5,8 +5,9 @@ module Rack
 
       MIME_TYPES = ["text/html", "application/xhtml+xml"]
 
-      def initialize(app)
+      def initialize(app, railsbug_enabled)
         @app = app
+        @railsbug_enabled = railsbug_enabled
       end
       
       def call(env)
@@ -17,19 +18,40 @@ module Rack
         status, headers, body = builder.call(@env)
         Rack::Bug.disable
         
-        data = @env['rack-bug.panels'].select{|p| p.respond_to?(:to_hash)}.inject({}){|h, p| h[p.name]=p.to_hash; h}.to_json
-
-        i = 0
-        begin
-          headers["X-RailsBug-#{i+=1}"] = data.slice!(0, 8000)
-        end while data.length > 0
 
         @response = Rack::Response.new(body, status, headers)
-        
-        #inject_toolbar if response_type_okay_to_modify?
+
+        if railsbug_enabled?
+          inject_railsbug_headers
+        elsif response_type_okay_to_modify?
+          inject_toolbar 
+        end
         
         return @response.to_a
       end
+
+      def railsbug_enabled?
+        @railsbug_enabled
+      end
+
+      def inject_railsbug_headers
+        data = collect_railsbug_data
+
+        i = 0
+        begin
+          @response["X-RailsBug-#{i+=1}"] = data.slice!(0, 8000)
+        end while data.length > 0
+      end
+      
+      def collect_railsbug_data
+        @env['rack-bug.panels'].select {|panel| 
+          panel.respond_to?(:to_hash)
+        }.reverse.inject({}){ |response_hash, panel| 
+          response_hash[panel.name]=panel.to_hash
+          response_hash
+        }.to_json
+      end
+
 
       def response_type_okay_to_modify?
         content_type, charset = @response.content_type.split(";")

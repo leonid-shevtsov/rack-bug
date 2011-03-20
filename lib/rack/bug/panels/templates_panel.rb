@@ -38,6 +38,12 @@ module Rack
         return result
       end
 
+      def to_hash
+        result = {:title => 'Rails '+heading, :templates => self.class.template_trace.to_hash}
+        self.class.reset
+        return result
+      end
+
     end
 
   end
