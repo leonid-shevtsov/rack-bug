@@ -21,6 +21,7 @@ module Rack
         end
 
         def time
+          @end_time ||= Time.now
           @end_time - @start_time
         end
 
