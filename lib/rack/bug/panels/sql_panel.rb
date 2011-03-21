@@ -37,7 +37,7 @@ module Rack
       end
 
       def self.total_time
-        (queries.inject(0) { |memo, query| memo + query.time}) * 1_000
+        (queries.inject(0) { |memo, query| memo + query.time})
       end
 
       def name

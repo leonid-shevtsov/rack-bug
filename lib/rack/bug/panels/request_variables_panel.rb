@@ -60,8 +60,8 @@ module Rack
 
       def controller_and_action
         parts = [
-#          @env['action_controller.request.path_parameters']['controller'],
-#          @env['action_controller.request.path_parameters']['action']
+          @env['action_dispatch.request.parameters']['controller'],
+          @env['action_dispatch.request.parameters']['action']
         ].compact
 
         parts.empty? ? 'Rails environment' : parts.join('#')
