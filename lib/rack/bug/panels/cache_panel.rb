@@ -46,7 +46,7 @@ module Rack
       end
 
       def to_hash
-        result = {:title => 'Rails '+heading, :stats => self.class.stats}
+        result = self.class.stats.queries.size>0 ? {:title => 'Rails '+heading, :stats => self.class.stats} : {}
         self.class.reset
         return result
       end

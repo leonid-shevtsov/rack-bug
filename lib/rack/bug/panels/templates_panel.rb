@@ -39,7 +39,8 @@ module Rack
       end
 
       def to_hash
-        result = {:title => 'Rails '+heading, :templates => self.class.template_trace.to_hash}
+        templates = self.class.template_trace.to_hash
+        result = templates.empty? ? {} : {:title => 'Rails '+heading, :templates => templates}
         self.class.reset
         return result
       end

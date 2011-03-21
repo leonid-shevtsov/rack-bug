@@ -45,6 +45,8 @@ module Rack
           panel.respond_to?(:to_hash)
         }.map { |panel| 
           [panel.name, panel.to_hash]
+        }.reject{|panel_entry| 
+          panel_entry[1].empty?
         }.to_json
       end
 
