@@ -54,6 +54,12 @@ module Rack
         return result
       end
 
+      def to_hash
+        result = {:title => "SQL queries (#{self.class.queries.length}): #{'%0.2fms' % self.class.total_time}", :queries => self.class.queries.map(&:to_hash)}
+        self.class.reset
+        return result
+      end
+
     end
 
   end

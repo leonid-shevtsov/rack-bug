@@ -14,7 +14,7 @@ module Rack
         @filtered_backtrace ||= @backtrace.map{|l| l.to_s.strip }.select do |line|
           root_for_backtrace_filtering.nil? ||
           (line.index(root_for_backtrace_filtering) == 0) && !(line.index(root_for_backtrace_filtering("vendor")) == 0)
-        end
+        end.map{|l| l.gsub(/^#{root_for_backtrace_filtering}\//, '')}
       end
 
       def root_for_backtrace_filtering(sub_path = nil)

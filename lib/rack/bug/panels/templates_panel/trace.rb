@@ -37,6 +37,10 @@ module Rack
         def root_rendering
           @root_rendering ||= Rendering.new("root")
         end
+
+        def to_hash
+          @root.to_hash[:children] || []
+        end
       end
 
     end

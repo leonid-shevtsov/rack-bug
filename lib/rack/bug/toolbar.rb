@@ -8,6 +8,8 @@ module Rack
       def initialize(app)
         @app = app
       end
+
+      attr_accessor :railsbug_enabled
       
       def call(env)
         @env = env
@@ -16,13 +18,38 @@ module Rack
         Rack::Bug.enable
         status, headers, body = builder.call(@env)
         Rack::Bug.disable
+        
 
         @response = Rack::Response.new(body, status, headers)
-        
-        inject_toolbar if response_type_okay_to_modify?
+
+        if railsbug_enabled
+          inject_railsbug_headers
+        elsif response_type_okay_to_modify?
+          inject_toolbar 
+        end
         
         return @response.to_a
       end
+
+      def inject_railsbug_headers
+        data = collect_railsbug_data
+
+        i = 0
+        begin
+          @response["X-RailsBug-#{i+=1}"] = data.slice!(0, 8000)
+        end while data.length > 0
+      end
+      
+      def collect_railsbug_data
+        @env['rack-bug.panels'].select {|panel| 
+          panel.respond_to?(:to_hash)
+        }.map { |panel| 
+          [panel.name, panel.to_hash]
+        }.reject{|panel_entry| 
+          panel_entry[1].empty?
+        }.to_json
+      end
+
 
       def response_type_okay_to_modify?
         content_type, charset = @response.content_type.split(";")

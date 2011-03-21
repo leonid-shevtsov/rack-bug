@@ -5,6 +5,16 @@ class Rack::Bug
     before do
       SQLPanel.reset
       rack_env "rack-bug.panel_classes", [SQLPanel]
+
+      unless defined?(ActiveRecord)
+        @added_rails = true
+        Object.const_set :ActiveRecord, Module.new
+        ActiveRecord.const_set :Base, Class.new
+      end
+    end
+    
+    after do
+      Object.send :remove_const, :ActiveRecord if @added_active_record
     end
 
     describe "heading" do
@@ -58,8 +68,8 @@ class Rack::Bug
           [["username"],
            ["bryan"]]
 
-        response = get_via_rack "/__rack_bug__/execute_sql", :query => "SELECT username FROM users",
-          :hash => "6f286f55b75716e5c91f16d77d09fa73b353ebc1"
+        response = get_via_rack "/__rack_bug__/execute_sql", {:query => "SELECT username FROM users",
+          :hash => "6f286f55b75716e5c91f16d77d09fa73b353ebc1"}, {:xhr => true}
         response.should contain("SELECT username FROM users")
         response.should be_ok
       end
@@ -68,8 +78,8 @@ class Rack::Bug
         rack_env "rack-bug.secret_key", 'abc'
 
         lambda {
-          get_via_rack "/__rack_bug__/execute_sql", :query => "SELECT username FROM users",
-            :hash => "foobar"
+          get_via_rack "/__rack_bug__/execute_sql", {:query => "SELECT username FROM users",
+            :hash => "foobar"}, {:xhr => true}
         }.should raise_error(SecurityError)
       end
 
@@ -77,8 +87,8 @@ class Rack::Bug
         rack_env "rack-bug.secret_key", nil
 
         lambda {
-          get_via_rack "/__rack_bug__/execute_sql", :query => "SELECT username FROM users",
-            :hash => "6f286f55b75716e5c91f16d77d09fa73b353ebc1"
+          get_via_rack "/__rack_bug__/execute_sql", {:query => "SELECT username FROM users",
+            :hash => "6f286f55b75716e5c91f16d77d09fa73b353ebc1"}, {:xhr => true}
         }.should raise_error(SecurityError)
       end
 
@@ -86,8 +96,8 @@ class Rack::Bug
         rack_env "rack-bug.secret_key", ""
 
         lambda {
-          get_via_rack "/__rack_bug__/execute_sql", :query => "SELECT username FROM users",
-            :hash => "6f286f55b75716e5c91f16d77d09fa73b353ebc1"
+          get_via_rack "/__rack_bug__/execute_sql", {:query => "SELECT username FROM users",
+            :hash => "6f286f55b75716e5c91f16d77d09fa73b353ebc1"}, {:xhr => true}
         }.should raise_error(SecurityError)
       end
     end

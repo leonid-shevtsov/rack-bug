@@ -1,4 +1,5 @@
 require "rack/bug/panels/cache_panel/memcache_extension"
+require "rack/bug/panels/cache_panel/dalli_extension"
 
 module Rack
   class Bug
@@ -40,6 +41,12 @@ module Rack
 
       def content
         result = render_template "panels/cache", :stats => self.class.stats
+        self.class.reset
+        return result
+      end
+
+      def to_hash
+        result = self.class.stats.queries.size>0 ? {:title => 'Rails '+heading, :stats => self.class.stats} : {}
         self.class.reset
         return result
       end
