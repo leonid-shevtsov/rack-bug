@@ -39,7 +39,7 @@ module Rack
         end
 
         def to_hash
-          @root.to_hash[:children] || []
+          @root_rendering.to_hash[:children] || []
         end
       end
 
