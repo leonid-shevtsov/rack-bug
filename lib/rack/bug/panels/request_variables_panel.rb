@@ -59,10 +59,10 @@ module Rack
       end
 
       def controller_and_action
-        parts = [
+        parts = @env['action_dispatch.request.parameters'] ? [
           @env['action_dispatch.request.parameters']['controller'],
           @env['action_dispatch.request.parameters']['action']
-        ].compact
+        ].compact : []
 
         parts.empty? ? 'Rails environment' : parts.join('#')
       end
